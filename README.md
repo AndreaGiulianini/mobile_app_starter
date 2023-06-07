@@ -4,9 +4,9 @@
 
 Il file config.dart contiene dati sensibili come chiavi e compagnia che non si vuole lasciare sotto git, importare a mano
 
-### Compilare GoRouter e MobX
+### Compilare GoRouter/MobX/JsonSerializable
 
-`flutter packages pub run build_runner build --delete-conflicting-outputs`
+`dart run build_runner build --delete-conflicting-outputs`
 
 ### Format di tutti i file del progetto
 

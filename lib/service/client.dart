@@ -41,7 +41,7 @@ class ClientAPI {
         queryParameters: request.queryParameters,
       );
       return response;
-    } on DioError catch (exception) {
+    } on DioException catch (exception) {
       return Response<dynamic>(
         requestOptions: exception.requestOptions,
         data: jsonEncode(<String, bool>{'success': false}),
