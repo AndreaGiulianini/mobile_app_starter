@@ -38,6 +38,8 @@ extension $SplashScreenPageExtension on SplashScreenPage {
 
   void pushReplacement(BuildContext context) =>
       context.pushReplacement(location);
+
+  void replace(BuildContext context) => context.replace(location);
 }
 
 extension $HomeScreenPageExtension on HomeScreenPage {
@@ -53,6 +55,8 @@ extension $HomeScreenPageExtension on HomeScreenPage {
 
   void pushReplacement(BuildContext context) =>
       context.pushReplacement(location);
+
+  void replace(BuildContext context) => context.replace(location);
 }
 
 extension $MaintenanceScreenPageExtension on MaintenanceScreenPage {
@@ -69,4 +73,6 @@ extension $MaintenanceScreenPageExtension on MaintenanceScreenPage {
 
   void pushReplacement(BuildContext context) =>
       context.pushReplacement(location);
+
+  void replace(BuildContext context) => context.replace(location);
 }

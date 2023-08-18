@@ -23,7 +23,7 @@ Il file config.dart contiene dati sensibili come chiavi e compagnia che non si v
 ### Linee guida generali sul codice del progetto
 
 1. Enum di un componente vanno 'part of' del componente stesso e dentro la stessa cartella
-2. Rimozione di tutti i warings possibili
+2. Rimozione di tutti i warnings possibili
 3. Solo named parameters nelle funzioni
 
 ### Comando per generare un apk
