@@ -51,7 +51,7 @@ class CurlLogger extends Interceptor {
       // FormData can't be JSON-serialized, so keep only their fields attributes
       if (options.data is FormData && convertFormData) {
         // ignore: avoid_dynamic_calls
-        options.data = Map<String, dynamic>.fromEntries(options.data.fields);
+        options.data = Map<String, dynamic>.fromEntries(options.data.fields as Iterable<MapEntry<String, dynamic>>);
       }
 
       final String data = json.encode(options.data).replaceAll('"', r'\"');

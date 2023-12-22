@@ -52,7 +52,7 @@ class _MyAppState extends State<MyApp> {
         ),
         Provider<CounterStore>(
           create: (BuildContext context) => CounterStore(),
-        )
+        ),
       ],
       child: MaterialApp.router(
         title: 'mobile_app_starter',

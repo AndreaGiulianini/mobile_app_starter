@@ -6,8 +6,7 @@ part 'pokemon.g.dart';
 class Pokemon {
   Pokemon({required this.name, required this.url});
 
-  factory Pokemon.fromJson(Map<String, dynamic> json) =>
-      _$PokemonFromJson(json);
+  factory Pokemon.fromJson(Map<String, dynamic> json) => _$PokemonFromJson(json);
 
   final String name;
   final String url;

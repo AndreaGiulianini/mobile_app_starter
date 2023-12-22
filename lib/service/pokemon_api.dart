@@ -17,6 +17,6 @@ extension PokemonAPI on ClientAPI {
       },
     );
 
-    return PokemonDTO.fromJson(response.data).results;
+    return PokemonDTO.fromJson(response.data as Map<String, dynamic>).results;
   }
 }
