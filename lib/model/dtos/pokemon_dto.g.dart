@@ -7,7 +7,7 @@ part of 'pokemon_dto.dart';
 // **************************************************************************
 
 PokemonDTO _$PokemonDTOFromJson(Map<String, dynamic> json) => PokemonDTO(
-      count: json['count'] as int,
+      count: (json['count'] as num).toInt(),
       next: json['next'] as String,
       previous: json['previous'] as String?,
       results: (json['results'] as List<dynamic>)
