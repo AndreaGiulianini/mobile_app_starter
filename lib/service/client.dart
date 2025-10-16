@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -36,29 +34,28 @@ class ClientAPI {
           method: request.method.name,
           contentType: request.contentType,
           headers: request.headers,
+          responseType: ResponseType.json,
         ),
         data: request.data,
         queryParameters: request.queryParameters,
       );
       return response;
     } on DioException catch (exception) {
-      return Response<dynamic>(
-        requestOptions: exception.requestOptions,
-        data: jsonEncode(<String, bool>{'success': false}),
-      );
+      // Log the error for debugging
+      if (kDebugMode) {
+        print('DioException occurred: ${exception.type}');
+        print('Error message: ${exception.message}');
+        print('Response data: ${exception.response?.data}');
+      }
+
+      // Rethrow the exception so the caller can handle it
+      rethrow;
     }
   }
 }
 
 class Request {
-  Request({
-    required this.url,
-    required this.method,
-    this.contentType,
-    this.data,
-    this.queryParameters,
-    this.headers,
-  });
+  Request({required this.url, required this.method, this.contentType, this.data, this.queryParameters, this.headers});
 
   final String url;
   final HttpMethod method;
@@ -74,9 +71,7 @@ enum HttpMethod {
   put(value: 'PUT'),
   delete(value: 'DELETE');
 
-  const HttpMethod({
-    required this.value,
-  });
+  const HttpMethod({required this.value});
 
   final String value;
 }

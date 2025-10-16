@@ -15,10 +15,7 @@ class CurlLogger extends Interceptor {
   }
 
   @override
-  void onResponse(
-    Response<dynamic> response,
-    ResponseInterceptorHandler handler,
-  ) {
+  void onResponse(Response<dynamic> response, ResponseInterceptorHandler handler) {
     if (printOnSuccess != null && printOnSuccess!) {
       _renderCurlRepresentation(response.requestOptions);
     }
@@ -41,7 +38,7 @@ class CurlLogger extends Interceptor {
       components.add('-X ${options.method}');
     }
 
-    options.headers.forEach((String k, v) {
+    options.headers.forEach((String k, dynamic v) {
       if (k != 'Cookie') {
         components.add('-H "$k: $v"');
       }

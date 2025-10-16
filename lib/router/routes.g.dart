@@ -6,73 +6,70 @@ part of 'routes.dart';
 // GoRouterGenerator
 // **************************************************************************
 
-List<RouteBase> get $appRoutes => [
-      $splashScreenPage,
-    ];
+List<RouteBase> get $appRoutes => [$pokedexScreenPage];
 
-RouteBase get $splashScreenPage => GoRouteData.$route(
-      path: '/',
-      factory: $SplashScreenPageExtension._fromState,
-      routes: [
-        GoRouteData.$route(
-          path: 'home',
-          factory: $HomeScreenPageExtension._fromState,
-        ),
-        GoRouteData.$route(
-          path: 'maintenance',
-          factory: $MaintenanceScreenPageExtension._fromState,
-        ),
-      ],
-    );
+RouteBase get $pokedexScreenPage => GoRouteData.$route(
+  path: '/',
+  factory: $PokedexScreenPage._fromState,
+  routes: [
+    GoRouteData.$route(path: 'home', factory: $HomeScreenPage._fromState),
+    GoRouteData.$route(path: 'maintenance', factory: $MaintenanceScreenPage._fromState),
+  ],
+);
 
-extension $SplashScreenPageExtension on SplashScreenPage {
-  static SplashScreenPage _fromState(GoRouterState state) => SplashScreenPage();
+mixin $PokedexScreenPage on GoRouteData {
+  static PokedexScreenPage _fromState(GoRouterState state) => PokedexScreenPage();
 
-  String get location => GoRouteData.$location(
-        '/',
-      );
+  @override
+  String get location => GoRouteData.$location('/');
 
+  @override
   void go(BuildContext context) => context.go(location);
 
+  @override
   Future<T?> push<T>(BuildContext context) => context.push<T>(location);
 
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
+  @override
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
 
+  @override
   void replace(BuildContext context) => context.replace(location);
 }
 
-extension $HomeScreenPageExtension on HomeScreenPage {
+mixin $HomeScreenPage on GoRouteData {
   static HomeScreenPage _fromState(GoRouterState state) => HomeScreenPage();
 
-  String get location => GoRouteData.$location(
-        '/home',
-      );
+  @override
+  String get location => GoRouteData.$location('/home');
 
+  @override
   void go(BuildContext context) => context.go(location);
 
+  @override
   Future<T?> push<T>(BuildContext context) => context.push<T>(location);
 
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
+  @override
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
 
+  @override
   void replace(BuildContext context) => context.replace(location);
 }
 
-extension $MaintenanceScreenPageExtension on MaintenanceScreenPage {
-  static MaintenanceScreenPage _fromState(GoRouterState state) =>
-      MaintenanceScreenPage();
+mixin $MaintenanceScreenPage on GoRouteData {
+  static MaintenanceScreenPage _fromState(GoRouterState state) => MaintenanceScreenPage();
 
-  String get location => GoRouteData.$location(
-        '/maintenance',
-      );
+  @override
+  String get location => GoRouteData.$location('/maintenance');
 
+  @override
   void go(BuildContext context) => context.go(location);
 
+  @override
   Future<T?> push<T>(BuildContext context) => context.push<T>(location);
 
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
+  @override
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
 
+  @override
   void replace(BuildContext context) => context.replace(location);
 }

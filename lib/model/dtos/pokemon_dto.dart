@@ -5,18 +5,12 @@ part 'pokemon_dto.g.dart';
 
 @JsonSerializable()
 class PokemonDTO {
-  PokemonDTO({
-    required this.count,
-    required this.next,
-    required this.previous,
-    required this.results,
-  });
+  PokemonDTO({required this.count, this.next, this.previous, required this.results});
 
-  factory PokemonDTO.fromJson(Map<String, dynamic> json) =>
-      _$PokemonDTOFromJson(json);
+  factory PokemonDTO.fromJson(Map<String, dynamic> json) => _$PokemonDTOFromJson(json);
 
   final int count;
-  final String next;
+  final String? next;
   final String? previous;
   final List<Pokemon> results;
 

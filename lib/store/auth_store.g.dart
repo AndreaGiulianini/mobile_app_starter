@@ -24,8 +24,7 @@ mixin _$AuthStore on AuthStoreBase, Store {
     });
   }
 
-  late final _$refreshTokenAtom =
-      Atom(name: 'AuthStoreBase.refreshToken', context: context);
+  late final _$refreshTokenAtom = Atom(name: 'AuthStoreBase.refreshToken', context: context);
 
   @override
   String? get refreshToken {
@@ -40,8 +39,7 @@ mixin _$AuthStore on AuthStoreBase, Store {
     });
   }
 
-  late final _$tokenVerifiedAtom =
-      Atom(name: 'AuthStoreBase.tokenVerified', context: context);
+  late final _$tokenVerifiedAtom = Atom(name: 'AuthStoreBase.tokenVerified', context: context);
 
   @override
   bool get tokenVerified {
@@ -56,29 +54,25 @@ mixin _$AuthStore on AuthStoreBase, Store {
     });
   }
 
-  late final _$initAsyncAction =
-      AsyncAction('AuthStoreBase.init', context: context);
+  late final _$initAsyncAction = AsyncAction('AuthStoreBase.init', context: context);
 
   @override
   Future<void> init() {
     return _$initAsyncAction.run(() => super.init());
   }
 
-  late final _$verifyAuthTokenAsyncAction =
-      AsyncAction('AuthStoreBase.verifyAuthToken', context: context);
+  late final _$verifyAuthTokenAsyncAction = AsyncAction('AuthStoreBase.verifyAuthToken', context: context);
 
   @override
   Future<void> verifyAuthToken() {
     return _$verifyAuthTokenAsyncAction.run(() => super.verifyAuthToken());
   }
 
-  late final _$AuthStoreBaseActionController =
-      ActionController(name: 'AuthStoreBase', context: context);
+  late final _$AuthStoreBaseActionController = ActionController(name: 'AuthStoreBase', context: context);
 
   @override
   void deleteToken() {
-    final _$actionInfo = _$AuthStoreBaseActionController.startAction(
-        name: 'AuthStoreBase.deleteToken');
+    final _$actionInfo = _$AuthStoreBaseActionController.startAction(name: 'AuthStoreBase.deleteToken');
     try {
       return super.deleteToken();
     } finally {

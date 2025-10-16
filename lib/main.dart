@@ -12,11 +12,7 @@ import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  unawaited(
-    SystemChrome.setPreferredOrientations(
-      <DeviceOrientation>[DeviceOrientation.portraitUp],
-    ),
-  );
+  unawaited(SystemChrome.setPreferredOrientations(<DeviceOrientation>[DeviceOrientation.portraitUp]));
   await EasyLocalization.ensureInitialized();
 
   runApp(
@@ -37,9 +33,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final GoRouter _router = GoRouter(
-    routes: $appRoutes,
-  );
+  final GoRouter _router = GoRouter(routes: $appRoutes);
 
   @override
   Widget build(BuildContext context) {
@@ -47,12 +41,8 @@ class _MyAppState extends State<MyApp> {
 
     return MultiProvider(
       providers: <Provider<dynamic>>[
-        Provider<AuthStore>(
-          create: (BuildContext context) => AuthStore(),
-        ),
-        Provider<CounterStore>(
-          create: (BuildContext context) => CounterStore(),
-        ),
+        Provider<AuthStore>(create: (BuildContext context) => AuthStore()),
+        Provider<CounterStore>(create: (BuildContext context) => CounterStore()),
       ],
       child: MaterialApp.router(
         title: 'mobile_app_starter',
@@ -60,10 +50,7 @@ class _MyAppState extends State<MyApp> {
         localizationsDelegates: context.localizationDelegates,
         supportedLocales: context.supportedLocales,
         locale: context.locale,
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-          useMaterial3: true,
-        ),
+        theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple), useMaterial3: true),
       ),
     );
   }

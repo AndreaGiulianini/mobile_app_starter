@@ -15,27 +15,20 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(
-          title: const Text('HomeScreen'),
-        ),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              const Text('home.count').tr(),
-              Observer(
-                builder: (_) => Text(
-                  '${_counter.value}',
-                  style: const TextStyle(fontSize: 20),
-                ),
-              ),
-            ],
-          ),
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: _counter.increment,
-          tooltip: 'home.increment'.tr(),
-          child: const Icon(Icons.add),
-        ),
-      );
+    appBar: AppBar(title: const Text('HomeScreen')),
+    body: Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          const Text('home.count').tr(),
+          Observer(builder: (_) => Text('${_counter.value}', style: const TextStyle(fontSize: 20))),
+        ],
+      ),
+    ),
+    floatingActionButton: FloatingActionButton(
+      onPressed: _counter.increment,
+      tooltip: 'home.increment'.tr(),
+      child: const Icon(Icons.add),
+    ),
+  );
 }

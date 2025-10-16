@@ -6,17 +6,23 @@ import 'package:mobile_app_starter/service/client.dart';
 extension PokemonAPI on ClientAPI {
   Future<List<Pokemon>> getListPokemon() async {
     final Response<dynamic> response = await request(
-      request: Request(
-        url: '/pokemon',
-        method: HttpMethod.get,
-      ),
-      errorData: <String, dynamic>{
-        'reason': 'Crash getListPokemon',
-        'url': '/pokemon',
-        'method': HttpMethod.get,
-      },
+      request: Request(url: '/pokemon?limit=20', method: HttpMethod.get),
+      errorData: <String, dynamic>{'reason': 'Crash getListPokemon', 'url': '/pokemon', 'method': HttpMethod.get},
     );
 
     return PokemonDTO.fromJson(response.data as Map<String, dynamic>).results;
+  }
+
+  Future<Pokemon> getPokemonDetails(String url) async {
+    // Extract the path from the full URL
+    final Uri uri = Uri.parse(url);
+    final String path = uri.path.replaceFirst('/api/v2', '');
+
+    final Response<dynamic> response = await request(
+      request: Request(url: path, method: HttpMethod.get),
+      errorData: <String, dynamic>{'reason': 'Crash getPokemonDetails', 'url': path, 'method': HttpMethod.get},
+    );
+
+    return Pokemon.fromJson(response.data as Map<String, dynamic>);
   }
 }
