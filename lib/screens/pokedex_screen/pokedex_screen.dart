@@ -1,10 +1,9 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mobile_app_starter/cubit/pokemon_cubit.dart';
+import 'package:mobile_app_starter/cubit/pokemon_state.dart';
 import 'package:mobile_app_starter/model/classes/pokemon.dart';
-import 'package:mobile_app_starter/router/routes.dart';
 import 'package:mobile_app_starter/screens/pokedex_screen/widgets/pokemon_card.dart';
-import 'package:mobile_app_starter/service/client.dart';
 
 class PokedexScreen extends StatefulWidget {
   const PokedexScreen({super.key});
@@ -14,113 +13,191 @@ class PokedexScreen extends StatefulWidget {
 }
 
 class _PokedexScreenState extends State<PokedexScreen> {
-  List<Pokemon>? _pokemonList;
-  bool _isLoading = true;
+  final ScrollController _scrollController = ScrollController();
+
+  // Constants
+  static const double _scrollThreshold = 0.9;
+  static const SliverGridDelegateWithFixedCrossAxisCount _gridDelegate =
+      SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: 0.75,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 8,
+      );
 
   @override
   void initState() {
     super.initState();
-    unawaited(_loadPokemon());
+    // Add scroll listener for infinite scroll
+    _scrollController.addListener(_onScroll);
+
+    // Defer context access until after first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        context.read<PokemonCubit>().loadPokemon();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_isBottom) {
+      context.read<PokemonCubit>().loadMore();
+    }
+  }
+
+  bool get _isBottom {
+    if (!_scrollController.hasClients) {
+      return false;
+    }
+    final double maxScroll = _scrollController.position.maxScrollExtent;
+    final double currentScroll = _scrollController.offset;
+    return currentScroll >= (maxScroll * _scrollThreshold);
   }
 
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
       title: const Text('Pokédex'),
-      backgroundColor: Colors.red,
-      foregroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.primary,
+      foregroundColor: Theme.of(context).colorScheme.onPrimary,
       elevation: 4,
     ),
-    body: _isLoading
-        ? const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[CircularProgressIndicator(), SizedBox(height: 16), Text('Loading Pokémon...')],
-            ),
-          )
-        : _pokemonList == null || _pokemonList!.isEmpty
-        ? Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                const Icon(Icons.error_outline, size: 64, color: Colors.grey),
-                const SizedBox(height: 16),
-                const Text('Failed to load Pokémon'),
-                const SizedBox(height: 16),
-                ElevatedButton(onPressed: _loadPokemon, child: const Text('Retry')),
-              ],
-            ),
-          )
-        : Padding(
-            padding: const EdgeInsets.all(8.0),
+    body: BlocBuilder<PokemonCubit, PokemonState>(
+      builder: (BuildContext context, PokemonState state) {
+        if (state is PokemonInitial || state is PokemonLoading) {
+          return _buildLoadingState(state);
+        }
+
+        if (state is PokemonError) {
+          return _buildErrorState(state);
+        }
+
+        if (state is PokemonSuccess) {
+          return _buildSuccessState(state.pokemonList, state.hasMore);
+        }
+
+        if (state is PokemonLoadingMore) {
+          return _buildSuccessState(
+            state.currentList,
+            true,
+            isLoadingMore: true,
+          );
+        }
+
+        return const SizedBox.shrink();
+      },
+    ),
+  );
+
+  Widget _buildLoadingState(PokemonState state) {
+    final List<Pokemon>? partialList = state is PokemonLoading
+        ? state.partialList
+        : null;
+
+    if (partialList != null && partialList.isNotEmpty) {
+      // Show progressive loading with partial data
+      return Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: GridView.builder(
+          gridDelegate: _gridDelegate,
+          itemCount: partialList.length,
+          itemBuilder: (BuildContext context, int index) {
+            final Pokemon pokemon = partialList[index];
+            return PokemonCard(
+              key: ValueKey<int>(pokemon.pokemonId),
+              pokemon: pokemon,
+            );
+          },
+        ),
+      );
+    }
+
+    return const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          CircularProgressIndicator(),
+          SizedBox(height: 16),
+          Text('Loading Pokémon...'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState(PokemonError state) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Icon(
+            Icons.error_outline,
+            size: 64,
+            color: Theme.of(context).colorScheme.error.withValues(alpha: 0.5),
+          ),
+          const SizedBox(height: 16),
+          Text(state.message),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () => context.read<PokemonCubit>().retry(),
+            child: const Text('Retry'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSuccessState(
+    List<Pokemon> pokemonList,
+    bool hasMore, {
+    bool isLoadingMore = false,
+  }) {
+    // Handle empty state
+    if (pokemonList.isEmpty) {
+      return const Center(child: Text('No Pokémon found'));
+    }
+
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        children: <Widget>[
+          Expanded(
             child: GridView.builder(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 0.75,
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 8,
-              ),
-              itemCount: _pokemonList!.length,
+              controller: _scrollController,
+              gridDelegate: _gridDelegate,
+              itemCount: pokemonList.length,
               itemBuilder: (BuildContext context, int index) {
-                return PokemonCard(pokemon: _pokemonList![index]);
+                final Pokemon pokemon = pokemonList[index];
+                return PokemonCard(
+                  key: ValueKey<int>(pokemon.pokemonId),
+                  pokemon: pokemon,
+                );
               },
             ),
           ),
-    floatingActionButton: _pokemonList != null && _pokemonList!.isNotEmpty
-        ? FloatingActionButton(onPressed: onPressed, child: const Icon(Icons.arrow_forward))
-        : null,
-  );
-
-  void onPressed() {
-    HomeScreenPage().go(context);
-  }
-
-  Future<void> _loadPokemon() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      // First, get the list of Pokemon
-      final List<Pokemon> basicList = await ClientAPI().getListPokemon();
-
-      // Then, fetch detailed info for each Pokemon
-      final List<Pokemon> detailedList = <Pokemon>[];
-      for (final Pokemon pokemon in basicList) {
-        if (pokemon.url == null) {
-          detailedList.add(pokemon);
-          continue;
-        }
-
-        try {
-          final Pokemon detailed = await ClientAPI().getPokemonDetails(pokemon.url!);
-          detailedList.add(detailed);
-
-          // Update UI progressively as we load each Pokemon
-          if (mounted) {
-            setState(() {
-              _pokemonList = List<Pokemon>.from(detailedList);
-            });
-          }
-        } catch (e) {
-          // If fetching details fails, add the basic Pokemon
-          detailedList.add(pokemon);
-        }
-      }
-
-      if (mounted) {
-        setState(() {
-          _pokemonList = detailedList;
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _pokemonList = null;
-          _isLoading = false;
-        });
-      }
-    }
+          if (isLoadingMore)
+            const Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                  SizedBox(width: 12),
+                  Text('Loading more Pokémon...'),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
   }
 }

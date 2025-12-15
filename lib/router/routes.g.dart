@@ -8,17 +8,12 @@ part of 'routes.dart';
 
 List<RouteBase> get $appRoutes => [$pokedexScreenPage];
 
-RouteBase get $pokedexScreenPage => GoRouteData.$route(
-  path: '/',
-  factory: $PokedexScreenPage._fromState,
-  routes: [
-    GoRouteData.$route(path: 'home', factory: $HomeScreenPage._fromState),
-    GoRouteData.$route(path: 'maintenance', factory: $MaintenanceScreenPage._fromState),
-  ],
-);
+RouteBase get $pokedexScreenPage =>
+    GoRouteData.$route(path: '/', factory: $PokedexScreenPage._fromState);
 
 mixin $PokedexScreenPage on GoRouteData {
-  static PokedexScreenPage _fromState(GoRouterState state) => PokedexScreenPage();
+  static PokedexScreenPage _fromState(GoRouterState state) =>
+      PokedexScreenPage();
 
   @override
   String get location => GoRouteData.$location('/');
@@ -30,45 +25,8 @@ mixin $PokedexScreenPage on GoRouteData {
   Future<T?> push<T>(BuildContext context) => context.push<T>(location);
 
   @override
-  void pushReplacement(BuildContext context) => context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
-}
-
-mixin $HomeScreenPage on GoRouteData {
-  static HomeScreenPage _fromState(GoRouterState state) => HomeScreenPage();
-
-  @override
-  String get location => GoRouteData.$location('/home');
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) => context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
-}
-
-mixin $MaintenanceScreenPage on GoRouteData {
-  static MaintenanceScreenPage _fromState(GoRouterState state) => MaintenanceScreenPage();
-
-  @override
-  String get location => GoRouteData.$location('/maintenance');
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) => context.pushReplacement(location);
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
 
   @override
   void replace(BuildContext context) => context.replace(location);
