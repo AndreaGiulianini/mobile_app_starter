@@ -1,0 +1,27 @@
+# The gate for what the README promises: analyze clean, tests green,
+# formatting pinned. Without this, those rules are honour-system only.
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+
+      - run: dart format --set-exit-if-changed .
+
+      - run: flutter analyze
+
+      - run: flutter test

@@ -42,9 +42,8 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
-.env*
-
-# Keep .env templates but ignore local overrides
-!.env.dev
-!.env.staging
-!.env.prod
+# The flavour files (.env.dev/.staging/.prod) are tracked on purpose: they
+# hold only public config, they are required assets, and a fresh clone must
+# build without manual steps. Ignore only ad-hoc local files.
+.env
+.env.local

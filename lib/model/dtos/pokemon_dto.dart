@@ -3,15 +3,18 @@ import 'package:mobile_app_starter/model/classes/pokemon.dart';
 
 part 'pokemon_dto.g.dart';
 
+/// Wire envelope of the paginated list endpoint.
+///
+/// `next`/`previous` are deliberately not parsed: pagination follows `count`
+/// and an explicit offset, so the cursor fields were dead weight.
 @JsonSerializable()
 class PokemonDTO {
-  PokemonDTO({required this.count, this.next, this.previous, required this.results});
+  PokemonDTO({required this.count, required this.results});
 
-  factory PokemonDTO.fromJson(Map<String, dynamic> json) => _$PokemonDTOFromJson(json);
+  factory PokemonDTO.fromJson(Map<String, dynamic> json) =>
+      _$PokemonDTOFromJson(json);
 
   final int count;
-  final String? next;
-  final String? previous;
   final List<Pokemon> results;
 
   Map<String, dynamic> toJson() => _$PokemonDTOToJson(this);

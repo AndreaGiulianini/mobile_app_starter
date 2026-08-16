@@ -1,107 +1,117 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mobile_app_starter/core/bloc/safe_emit.dart';
 import 'package:mobile_app_starter/core/errors/app_exception.dart';
 import 'package:mobile_app_starter/cubit/pokemon_state.dart';
 import 'package:mobile_app_starter/model/classes/pokemon.dart';
-import 'package:mobile_app_starter/service/client.dart';
+import 'package:mobile_app_starter/model/classes/pokemon_page.dart';
+import 'package:mobile_app_starter/repository/pokemon_repository.dart';
 
-class PokemonCubit extends Cubit<PokemonState> {
-  PokemonCubit(this._clientAPI) : super(const PokemonInitial());
+/// Drives the paginated Pokédex list.
+///
+/// Pagination state lives in [PokemonState], not in fields. The one mutable
+/// field, [_generation], is command plumbing: it invalidates emits from a
+/// command that another command has since superseded. See ARCHITECTURE.md,
+/// "Bloc or Cubit?".
+class PokemonCubit extends Cubit<PokemonState> with SafeEmit<PokemonState> {
+  PokemonCubit(this._repository) : super(const PokemonInitial());
 
-  final ClientAPI _clientAPI;
-  static const int _pageSize = 20;
-  static const int _maxPokemon = 1000; // PokeAPI has ~1000 Pokemon
-  int _currentOffset = 0;
-  bool _isLoadingMore = false;
+  final PokemonRepository _repository;
+
+  /// Bumped at the start of every command. A command captures the value and
+  /// only emits while it still matches, so a reload started mid-`loadMore`
+  /// cannot have its fresh page-0 list overwritten by the stale append.
+  int _generation = 0;
 
   Future<void> loadPokemon() async {
+    // A double-tapped retry must not fire two page-0 requests.
+    if (state is PokemonLoading) {
+      return;
+    }
+    final int generation = ++_generation;
     emit(const PokemonLoading());
-    _currentOffset = 0;
 
     try {
-      // First, get the list of Pokemon
-      final List<Pokemon> basicList = await _clientAPI.getListPokemon();
-
-      // Parallelize fetching detailed info for better performance
-      final List<Pokemon> detailedList = await _fetchPokemonDetails(basicList);
-
-      _currentOffset += _pageSize;
-      final bool hasMore = _currentOffset < _maxPokemon;
-
-      emit(PokemonSuccess(detailedList, hasMore: hasMore));
-    } on AppException catch (e) {
-      emit(PokemonError(e.message));
-    } catch (e) {
-      emit(
+      final PokemonPage page = await _repository.getPage();
+      _safeEmit(
+        generation,
+        _successFrom(page, previous: const <Pokemon>[], offset: 0),
+      );
+    } on AppException catch (e, stackTrace) {
+      addError(e, stackTrace);
+      _safeEmit(generation, PokemonError(e.message));
+    } catch (e, stackTrace) {
+      addError(e, stackTrace);
+      _safeEmit(
+        generation,
         const PokemonError('An unexpected error occurred. Please try again.'),
       );
     }
   }
 
   Future<void> loadMore() async {
-    if (_isLoadingMore) {
+    final PokemonState current = state;
+    // Doubles as the concurrency guard: mid-fetch the state is LoadingMore.
+    if (current is! PokemonSuccess || !current.hasMore) {
       return;
     }
 
-    final PokemonState currentState = state;
-    if (currentState is! PokemonSuccess) {
-      return;
-    }
-    if (!currentState.hasMore) {
-      return;
-    }
-
-    _isLoadingMore = true;
-    emit(PokemonLoadingMore(currentState.pokemonList));
+    final int generation = ++_generation;
+    emit(
+      PokemonLoadingMore(current.pokemonList, nextOffset: current.nextOffset),
+    );
 
     try {
-      // Get the next page of Pokemon
-      final List<Pokemon> basicList = await _clientAPI.getListPokemon(
-        offset: _currentOffset,
+      final PokemonPage page = await _repository.getPage(
+        offset: current.nextOffset,
       );
-
-      // Parallelize fetching detailed info
-      final List<Pokemon> detailedList = await _fetchPokemonDetails(basicList);
-
-      // Combine with existing list
-      final List<Pokemon> updatedList = <Pokemon>[
-        ...currentState.pokemonList,
-        ...detailedList,
-      ];
-
-      _currentOffset += _pageSize;
-      final bool hasMore = _currentOffset < _maxPokemon;
-
-      emit(PokemonSuccess(updatedList, hasMore: hasMore));
-    } on AppException {
-      // If loading more fails, return to previous success state
-      emit(
-        PokemonSuccess(currentState.pokemonList, hasMore: currentState.hasMore),
+      _safeEmit(
+        generation,
+        _successFrom(
+          page,
+          previous: current.pokemonList,
+          offset: current.nextOffset,
+        ),
       );
-    } catch (_) {
-      emit(
-        PokemonSuccess(currentState.pokemonList, hasMore: currentState.hasMore),
+    } catch (e, stackTrace) {
+      addError(e, stackTrace);
+      // A failed page must not discard what the user is already looking at;
+      // the flag lets the UI say so without leaving the list.
+      _safeEmit(
+        generation,
+        PokemonSuccess(
+          current.pokemonList,
+          hasMore: current.hasMore,
+          nextOffset: current.nextOffset,
+          loadMoreFailed: true,
+        ),
       );
-    } finally {
-      _isLoadingMore = false;
     }
   }
 
-  Future<List<Pokemon>> _fetchPokemonDetails(List<Pokemon> basicList) async {
-    final List<Future<Pokemon>> futures = basicList.map((Pokemon pokemon) {
-      if (pokemon.url == null) {
-        return Future<Pokemon>.value(pokemon);
-      }
-      return _clientAPI
-          .getPokemonDetails(pokemon.url!)
-          .catchError(
-            (dynamic error) => pokemon, // Return basic pokemon if details fail
-          );
-    }).toList();
+  Future<void> retry() => loadPokemon();
 
-    return Future.wait(futures);
+  /// `hasMore` compares against the API's own `total`, so pagination stops at
+  /// the real end of the Pokédex rather than a hardcoded ceiling.
+  PokemonSuccess _successFrom(
+    PokemonPage page, {
+    required List<Pokemon> previous,
+    required int offset,
+  }) {
+    final int nextOffset = offset + page.items.length;
+    return PokemonSuccess(
+      // Unmodifiable: state handed to the UI must not be mutable in place —
+      // an in-place add would keep Equatable equality and skip the rebuild.
+      List<Pokemon>.unmodifiable(previous.followedBy(page.items)),
+      hasMore: page.items.isNotEmpty && nextOffset < page.total,
+      nextOffset: nextOffset,
+    );
   }
 
-  void retry() {
-    loadPokemon();
+  /// [SafeEmit.safeEmit] plus the generation check: a command must not emit
+  /// once another command has superseded it.
+  void _safeEmit(int generation, PokemonState newState) {
+    if (generation == _generation) {
+      safeEmit(newState);
+    }
   }
 }

@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Pokemon type color mappings for type badges
-class PokemonTypeColors {
+abstract final class PokemonTypeColors {
   PokemonTypeColors._();
 
   static const Map<String, Color> typeColors = <String, Color>{

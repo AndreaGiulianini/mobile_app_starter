@@ -11,6 +11,12 @@
 #   - https://github.com/flutter/engine/blob/main/analysis_options.yaml
 #   - https://github.com/flutter/packages/blob/main/analysis_options.yaml
 
+# Pin the formatter width so `dart format` is deterministic for everyone.
+# 80 is both the dart default and what this codebase already matches; the
+# README used to claim 120, which no file actually followed.
+formatter:
+  page_width: 80
+
 analyzer:
   language:
     strict-casts: true
@@ -24,8 +30,13 @@ analyzer:
     - lib/router/*.g.dart
     - lib/model/classes/*.g.dart
     - lib/model/dtos/*.g.dart
-    - lib/store/*.g.dart
-    - lib/router/*.g.dart
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
 
 linter:
   rules:
@@ -35,11 +46,17 @@ linter:
     - always_specify_types
     - always_use_package_imports
     - annotate_overrides
+    - annotate_redeclares
+    - async_return_with_no_await
     # - avoid_annotating_with_dynamic # conflicts with always_specify_types
     - avoid_bool_literals_in_conditional_expressions
     # - avoid_catches_without_on_clauses # blocked on https://github.com/dart-lang/linter/issues/3023
     # - avoid_catching_errors # blocked on https://github.com/dart-lang/linter/issues/3023
-    - avoid_classes_with_only_static_members
+    # - avoid_classes_with_only_static_members # AppConfig/AppTheme are
+    #   namespaces, not objects. They are `abstract final class`, which is the
+    #   modern Dart idiom for exactly that and already blocks instantiation and
+    #   extension; the lint predates it and would push these to bare top-level
+    #   members, losing the namespace for no gain.
     - avoid_double_and_int_checks
     - avoid_dynamic_calls
     - avoid_empty_else
@@ -47,12 +64,14 @@ linter:
     - avoid_escaping_inner_quotes
     - avoid_field_initializers_in_const_classes
     # - avoid_final_parameters # incompatible with prefer_final_parameters
+    - avoid_final_parameters
     - avoid_function_literals_in_foreach_calls
+    - avoid_futureor_void
     # - avoid_implementing_value_types # see https://github.com/dart-lang/linter/issues/4558
     - avoid_init_to_null
     - avoid_js_rounded_ints
     # - avoid_multiple_declarations_per_line # seems to be a stylistic choice we don't subscribe to
-    - avoid_null_checks_in_equality_operators
+    # - avoid_null_checks_in_equality_operators # deprecated; superseded by the non_nullable_equals_parameter warning, which is on by default
     # - avoid_positional_boolean_parameters # would have been nice to enable this but by now there's too many places that break it
     - avoid_print
     # - avoid_private_typedef_functions # we prefer having typedef (discussion in https://github.com/flutter/flutter/pull/16356)
@@ -95,8 +114,10 @@ linter:
     - directives_ordering
     # - discarded_futures # too many false positives, similar to unawaited_futures
     # - do_not_use_environment # there are appropriate times to use the environment, especially in our tests and build logic
+    - document_ignores
     - empty_catches
     - empty_constructor_bodies
+    - empty_container_bodies
     - empty_statements
     - eol_at_end_of_file
     - exhaustive_cases
@@ -106,7 +127,9 @@ linter:
     - implementation_imports
     - implicit_call_tearoffs
     - implicit_reopen
+    - initialize_in_field_declaration
     - invalid_case_patterns
+    - invalid_runtime_check_with_js_interop_types
     # - join_return_with_assignment # not required by flutter style
     - leading_newlines_in_multiline_strings
     - library_annotations
@@ -116,14 +139,18 @@ linter:
     # - lines_longer_than_80_chars # not required by flutter style
     - literal_only_boolean_expressions
     # - matching_super_parameters # blocked on https://github.com/dart-lang/language/issues/2509
+    - migrate_design_widgets
+    - missing_code_block_language_in_doc_comment
     - missing_whitespace_between_adjacent_strings
     - no_adjacent_strings_in_list
     - no_default_cases
     - no_duplicate_case_values
+    - no_dynamic_casts
     - no_leading_underscores_for_library_prefixes
     - no_leading_underscores_for_local_identifiers
     - no_literal_bool_comparisons
     - no_logic_in_create_state
+    - no_raw_types
     - no_runtimeType_toString # DIFFERENT FROM FLUTTER/FLUTTER
     - no_self_assignments
     - no_wildcard_variable_uses
@@ -132,6 +159,8 @@ linter:
     - null_check_on_nullable_type_parameter
     - null_closures
     # - omit_local_variable_types # opposite of always_specify_types
+    # - omit_obvious_local_variable_types # incompatible with always_specify_types (analyzer reports incompatible_lint)
+    # - omit_obvious_property_types # incompatible with always_specify_types (analyzer reports incompatible_lint)
     # - one_member_abstracts # too many false positives
     - only_throw_errors # this does get disabled in a few places where we have legacy code that uses strings et al
     - overridden_fields
@@ -173,6 +202,7 @@ linter:
     # - prefer_null_aware_method_calls # "call()" is confusing to people new to the language since it's not documented anywhere
     - prefer_null_aware_operators
     # - prefer_relative_imports
+    # - prefer_relative_imports # incompatible with always_use_package_imports (analyzer reports incompatible_lint)
     - prefer_single_quotes
     - prefer_spread_collections
     - prefer_typing_uninitialized_variables
@@ -182,6 +212,8 @@ linter:
     - recursive_getters
     - require_trailing_commas
     - secure_pubspec_urls
+    - simple_directive_paths
+    - simplify_variable_pattern
     - sized_box_for_whitespace
     - sized_box_shrink_expand
     - slash_for_doc_comments
@@ -189,6 +221,10 @@ linter:
     - sort_constructors_first
     - sort_pub_dependencies # DIFFERENT FROM FLUTTER/FLUTTER: Flutter's use case for not sorting does not apply to this repository.
     - sort_unnamed_constructors_first
+    # - specify_nonobvious_local_variable_types # redundant under always_specify_types
+    # - specify_nonobvious_property_types # redundant under always_specify_types
+    - strict_top_level_inference
+    - switch_on_type
     - test_types_in_equals
     - throw_in_finally
     - tighten_type_of_initializing_formals
@@ -196,16 +232,21 @@ linter:
     - type_init_formals
     - type_literal_in_constant_pattern
     - unawaited_futures # DIFFERENT FROM FLUTTER/FLUTTER: It's disabled there for "too many false positives"; that's not an issue here, and missing awaits have caused production issues in plugins.
-    - unnecessary_await_in_return
+    - unintended_html_in_doc_comment
+    - unnecessary_async
+    # - unnecessary_await_in_return # deprecated
     - unnecessary_brace_in_string_interps
     - unnecessary_breaks
     - unnecessary_const
+    - unnecessary_const_in_enum_constructor
     - unnecessary_constructor_name
     # - unnecessary_final # conflicts with prefer_final_locals
     - unnecessary_getters_setters
+    - unnecessary_ignore
     # - unnecessary_lambdas # has false positives: https://github.com/dart-lang/linter/issues/498
     - unnecessary_late
     - unnecessary_library_directive
+    - unnecessary_library_name
     - unnecessary_new
     - unnecessary_null_aware_assignments
     - unnecessary_null_aware_operator_on_extension_on_nullable
@@ -214,25 +255,33 @@ linter:
     - unnecessary_nullable_for_final_variable_declarations
     - unnecessary_overrides
     - unnecessary_parenthesis
+    - unnecessary_primary_constructor_body
     # - unnecessary_raw_strings # what's "necessary" is a matter of opinion; consistency across strings can help readability more than this lint
     - unnecessary_statements
     - unnecessary_string_escapes
     - unnecessary_string_interpolations
     - unnecessary_this
     - unnecessary_to_list_in_spreads
+    # - unnecessary_type_name_in_constructor # conflicts with this repo's explicit-type style; 38 hits
+    - unnecessary_unawaited
+    - unnecessary_underscores
     - unreachable_from_main
     - unrelated_type_equality_checks
+    - unsafe_variance
     - use_build_context_synchronously
     - use_colored_box
+    - use_declaring_parameters
     # - use_decorated_box # leads to bugs: DecoratedBox and Container are not equivalent (Container inserts extra padding)
     - use_enums
     - use_full_hex_values_for_flutter_colors
     - use_function_type_syntax_for_parameters
-    - use_if_null_to_convert_nulls_to_bools
+    # - use_if_null_to_convert_nulls_to_bools # deprecated
     - use_is_even_rather_than_modulo
     - use_key_in_widget_constructors
     - use_late_for_private_fields_and_variables
     - use_named_constants
+    - use_null_aware_elements
+    # - use_primary_constructors # would restructure every class in the repo; 39 hits
     - use_raw_strings
     - use_rethrow_when_possible
     - use_setters_to_change_properties
@@ -241,5 +290,7 @@ linter:
     - use_super_parameters
     - use_test_throws_matchers
     # - use_to_and_as_if_applicable # has false positives, so we prefer to catch this by code-review
+    - use_truncating_division
     - valid_regexps
+    - var_with_no_type_annotation
     - void_checks

@@ -1,0 +1,23 @@
+# Configuration for `flutter gen-l10n`.
+#
+# Generation runs automatically on `flutter pub get`, `flutter run` and
+# `flutter build` (gated on `generate: true` in pubspec.yaml). It does NOT run
+# on `flutter analyze`, which is why the generated files are committed.
+#
+# `synthetic-package` is deliberately absent: setting it to true is now a hard
+# error and false only earns a warning telling you to remove it.
+arb-dir: lib/l10n
+template-arb-file: app_en.arb
+output-localization-file: app_localizations.dart
+output-class: AppLocalizations
+
+# Non-nullable getter: AppLocalizations.of(context) never returns null, so call
+# sites need no `!`. Safe because the delegate is always installed.
+nullable-getter: false
+
+# Require @-metadata on every resource in the template file only. Translations
+# stay metadata-free, so translators are not asked to duplicate descriptions.
+required-resource-attributes: true
+
+# Keep generated output formatted like the rest of the codebase.
+format: true

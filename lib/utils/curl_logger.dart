@@ -1,10 +1,23 @@
 import 'dart:convert';
 import 'dart:developer';
+
 import 'package:dio/dio.dart';
 
+/// Headers that must never be printed, matched case-insensitively. This is a
+/// starter template others copy: the day an Authorization header appears, it
+/// must not land in logcat.
+const Set<String> _redactedHeaders = <String>{
+  'authorization',
+  'proxy-authorization',
+  'cookie',
+  'set-cookie',
+  'x-api-key',
+};
+
 class CurlLogger extends Interceptor {
-  CurlLogger({this.printOnSuccess, this.convertFormData = true});
-  final bool? printOnSuccess;
+  CurlLogger({this.printOnSuccess = false, this.convertFormData = true});
+
+  final bool printOnSuccess;
   final bool convertFormData;
 
   @override
@@ -15,16 +28,18 @@ class CurlLogger extends Interceptor {
   }
 
   @override
-  void onResponse(Response<dynamic> response, ResponseInterceptorHandler handler) {
-    if (printOnSuccess != null && printOnSuccess!) {
+  void onResponse(
+    Response<dynamic> response,
+    ResponseInterceptorHandler handler,
+  ) {
+    if (printOnSuccess) {
       _renderCurlRepresentation(response.requestOptions);
     }
 
-    return handler.next(response); //continue
+    return handler.next(response);
   }
 
   void _renderCurlRepresentation(RequestOptions requestOptions) {
-    // add a breakpoint here so all errors can break
     try {
       log(_cURLRepresentation(requestOptions));
     } catch (err) {
@@ -39,20 +54,26 @@ class CurlLogger extends Interceptor {
     }
 
     options.headers.forEach((String k, dynamic v) {
-      if (k != 'Cookie') {
-        components.add('-H "$k: $v"');
-      }
+      components.add(
+        _redactedHeaders.contains(k.toLowerCase())
+            ? '-H "$k: <redacted>"'
+            : '-H "$k: $v"',
+      );
     });
 
     if (options.data != null) {
-      // FormData can't be JSON-serialized, so keep only their fields attributes
-      if (options.data is FormData && convertFormData) {
-        // ignore: avoid_dynamic_calls
-        options.data = Map<String, dynamic>.fromEntries(options.data.fields as Iterable<MapEntry<String, dynamic>>);
+      // Into a local: assigning back to options.data would change the body
+      // actually sent.
+      Object? payload = options.data;
+      if (payload is FormData && convertFormData) {
+        payload = Map<String, dynamic>.fromEntries(payload.fields);
       }
 
-      final String data = json.encode(options.data).replaceAll('"', r'\"');
-      components.add('-d "$data"');
+      // Single quotes with '\'' escaping: the double-quoted form left $, `
+      // and newlines live, so pasting the line into a shell could execute
+      // parts of the body.
+      final String data = json.encode(payload).replaceAll("'", r"'\''");
+      components.add("-d '$data'");
     }
 
     components.add('"${options.uri}"');

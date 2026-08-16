@@ -1,0 +1,181 @@
+{
+  "@@locale": "en",
+  "appTitle": "Pokédex",
+  "@appTitle": {
+    "description": "Application title. Shown in the app bar and in the OS task switcher."
+  },
+  "pokedexLoading": "Loading Pokémon...",
+  "@pokedexLoading": {
+    "description": "Full-screen message shown while the first page of Pokémon is being fetched."
+  },
+  "pokedexLoadingMore": "Loading more Pokémon...",
+  "@pokedexLoadingMore": {
+    "description": "Inline message shown below the grid while the next page is being fetched."
+  },
+  "pokedexEmpty": "No Pokémon found",
+  "@pokedexEmpty": {
+    "description": "Shown when the API returns successfully but with an empty list."
+  },
+  "pokedexRetry": "Retry",
+  "@pokedexRetry": {
+    "description": "Label of the button that re-runs the request after a failure."
+  },
+  "pokedexLoadMoreFailed": "Couldn't load more Pokémon. Scroll again to retry.",
+  "@pokedexLoadMoreFailed": {
+    "description": "SnackBar shown when fetching the next page fails; the list already on screen is kept."
+  },
+  "pokemonNumber": "#{number}",
+  "@pokemonNumber": {
+    "description": "National Pokédex number shown on a Pokémon card. Zero-padded by the caller.",
+    "placeholders": {
+      "number": {
+        "type": "String",
+        "example": "025"
+      }
+    }
+  },
+  "pokemonHeight": "H: {meters} m",
+  "@pokemonHeight": {
+    "description": "Height of a Pokémon in metres, shown on the card. The decimal separator follows the locale.",
+    "placeholders": {
+      "meters": {
+        "type": "double",
+        "format": "decimalPattern",
+        "example": "0.7"
+      }
+    }
+  },
+  "pokemonWeight": "W: {kilograms} kg",
+  "@pokemonWeight": {
+    "description": "Weight of a Pokémon in kilograms, shown on the card. The decimal separator follows the locale.",
+    "placeholders": {
+      "kilograms": {
+        "type": "double",
+        "format": "decimalPattern",
+        "example": "6.9"
+      }
+    }
+  },
+  "pokemonTypeCount": "{count, plural, =0{No types} =1{1 type} other{{count} types}}",
+  "@pokemonTypeCount": {
+    "description": "Screen-reader label for the row of type chips on a Pokémon card.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "searchHint": "Search Pokémon",
+  "@searchHint": {
+    "description": "Placeholder inside the search field in the Pokedex app bar."
+  },
+  "searchNoResults": "No Pokémon matches “{query}”",
+  "@searchNoResults": {
+    "description": "Shown when a search returns nothing.",
+    "placeholders": {
+      "query": {
+        "type": "String",
+        "example": "pikaxu"
+      }
+    }
+  },
+  "searchResultCount": "{count, plural, =1{1 result} other{{count} results}}",
+  "@searchResultCount": {
+    "description": "Header above the search results list.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "searchFailed": "Search failed. Please try again.",
+  "@searchFailed": {
+    "description": "Shown when the search request errors out."
+  },
+  "favoriteAdd": "Add to favourites",
+  "@favoriteAdd": {
+    "description": "Accessibility label for the favourite toggle when not yet favourited."
+  },
+  "favoriteRemove": "Remove from favourites",
+  "@favoriteRemove": {
+    "description": "Accessibility label for the favourite toggle when already favourited."
+  },
+  "detailHeight": "Height",
+  "@detailHeight": {
+    "description": "Stat label on the detail screen."
+  },
+  "detailWeight": "Weight",
+  "@detailWeight": {
+    "description": "Stat label on the detail screen."
+  },
+  "detailTypes": "Types",
+  "@detailTypes": {
+    "description": "Section heading above the type chips on the detail screen."
+  },
+  "detailLoadFailed": "Could not load this Pokémon.",
+  "@detailLoadFailed": {
+    "description": "Shown when the detail request fails."
+  },
+  "detailStats": "Base stats",
+  "@detailStats": {
+    "description": "Section heading above the base-stat bars."
+  },
+  "detailAbilities": "Abilities",
+  "@detailAbilities": {
+    "description": "Section heading above the ability chips."
+  },
+  "detailAbilityHidden": "hidden",
+  "@detailAbilityHidden": {
+    "description": "Badge marking an ability the API flags as hidden."
+  },
+  "detailBaseExperience": "Base experience",
+  "@detailBaseExperience": {
+    "description": "Stat label for base_experience."
+  },
+  "statHp": "HP",
+  "@statHp": {
+    "description": "Base stat: hit points."
+  },
+  "statAttack": "Attack",
+  "@statAttack": {
+    "description": "Base stat: physical attack."
+  },
+  "statDefense": "Defense",
+  "@statDefense": {
+    "description": "Base stat: physical defense."
+  },
+  "statSpecialAttack": "Sp. Atk",
+  "@statSpecialAttack": {
+    "description": "Base stat: special attack, abbreviated to fit a narrow label column."
+  },
+  "statSpecialDefense": "Sp. Def",
+  "@statSpecialDefense": {
+    "description": "Base stat: special defense, abbreviated."
+  },
+  "statSpeed": "Speed",
+  "@statSpeed": {
+    "description": "Base stat: speed."
+  },
+  "valueMeters": "{meters} m",
+  "@valueMeters": {
+    "description": "Height with no prefix, for the detail screen where the row already carries a Height label.",
+    "placeholders": {
+      "meters": {
+        "type": "double",
+        "format": "decimalPattern",
+        "example": "0.7"
+      }
+    }
+  },
+  "valueKilograms": "{kilograms} kg",
+  "@valueKilograms": {
+    "description": "Weight with no prefix, for the detail screen where the row already carries a Weight label.",
+    "placeholders": {
+      "kilograms": {
+        "type": "double",
+        "format": "decimalPattern",
+        "example": "6.9"
+      }
+    }
+  }
+}

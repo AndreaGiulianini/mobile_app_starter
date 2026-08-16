@@ -1,0 +1,10 @@
+# Global json_serializable defaults, so no class can forget them.
+targets:
+  $default:
+    builders:
+      json_serializable:
+        options:
+          # Nested objects serialize as maps, not object instances. Without
+          # this, only classes annotated by hand got it, and everything else
+          # produced maps holding live Dart objects.
+          explicit_to_json: true
